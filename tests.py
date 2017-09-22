@@ -11,6 +11,7 @@ class PartyTests(unittest.TestCase):
         self.client = app.test_client()
         app.config['TESTING'] = True
 
+
     def test_homepage(self):
         result = self.client.get("/")
         self.assertIn("board games, rainbows, and ice cream sundaes", result.data)
@@ -41,6 +42,9 @@ class PartyTestsDatabase(unittest.TestCase):
 
         self.client = app.test_client()
         app.config['TESTING'] = True
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['RSVP'] = True
 
         # Connect to test database (uncomment when testing database)
         connect_to_db(app, "postgresql:///testdb")
@@ -58,7 +62,7 @@ class PartyTestsDatabase(unittest.TestCase):
 
     def test_games(self):
         #FIXME: test that the games page displays the game from example_data()
-        result = self.client.get('/games')
+        result = self.client.get('/games', follow_redirects=True)
 
         self.assertIn('Operation', result.data)
         self.assertIn('Money and greed', result.data)
